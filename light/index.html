@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LINE Audience Intelligence — Dashboard</title>
+  <title>LINE Growth Tracker — Dashboard</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Inter=本文 / Noto Sans JP 900=インパクトのある見出し(和英対応) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Chart.js + noUiSlider -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -50,7 +52,7 @@
       <div class="topbar" id="overview">
         <div>
           <img src="04_obayashi_c.png" alt="大林組 OBAYASHI" class="brand-logo-mobile" />
-          <h1>Audience Intelligence Overview</h1>
+          <h1>LINE Growth Tracker</h1>
           <p>LINE 友だち属性・流入経路・エンゲージメント統合分析</p>
         </div>
         <div class="status">
@@ -101,7 +103,6 @@
 
         <!-- ===== Domain 1: Attribute (青) ===== -->
         <div class="section-label dom-attr" id="attributes">
-          <span class="chip">Attribute</span>
           <div>
             <h2>ユーザー属性</h2>
             <p>登録ユーザーが「誰か」を示すデモグラフィック指標</p>
@@ -112,7 +113,6 @@
 
         <!-- ===== Domain 2: Acquisition (緑) ===== -->
         <div class="section-label dom-acq" id="acquisition">
-          <span class="chip">Acquisition</span>
           <div>
             <h2>流入経路 <span class="note">※ ユーザー属性とは別軸</span></h2>
             <p>ユーザーが「どこから来たか」を示す獲得チャネル指標</p>
@@ -123,7 +123,6 @@
 
         <!-- ===== Domain 3: Engagement / Rich menu (紫) ===== -->
         <div class="section-label dom-rich" id="engagement">
-          <span class="chip">Engagement</span>
           <div>
             <h2>エンゲージメント <span class="note">※ 属性・流入経路とは別軸</span></h2>
             <p>ユーザーが「何を押したか / まちにどれだけ愛着があるか」を示す行動指標</p>
@@ -133,10 +132,9 @@
         <section class="grid-2 dom-rich" id="engGrid"></section>
 
         <div class="footer-note">
-          Audience IQ · データは <code>line_datamart.json</code> を参照して自動描画されます（日次差し替え対応）
+          データは <code>line_datamart.json</code> を参照して自動描画されます（日次差し替え対応）
         </div>
       </div>
-
     </main>
   </div>
 
