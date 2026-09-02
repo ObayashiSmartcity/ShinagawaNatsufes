@@ -1,1 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LINE Audience Intelligence — Dashboard</title>
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js + noUiSlider -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+
+  <!-- App theme + config -->
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ===================== Sidebar ===================== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">L</div>
+        <div class="brand-txt">
+          <b>Audience IQ</b>
+          <span>LINE Analytics Suite</span>
+        </div>
+      </div>
+
+      <nav class="nav-group">
+        <div class="cap">Analytics</div>
+        <!-- data-target でセクションへスムーズスクロール -->
+        <div class="nav-item active" data-target="overview"><span class="ic">◧</span> Overview</div>
+        <div class="nav-item" data-target="attributes"><span class="ic attr">◔</span> Attribute（属性）</div>
+        <div class="nav-item" data-target="acquisition"><span class="ic acq">◕</span> Acquisition（流入）</div>
+        <div class="nav-item" data-target="engagement"><span class="ic rich">◱</span> Engagement（行動）</div>
+      </nav>
+
+      <div class="side-foot">
+        <span class="dot">●</span> Data source<br>
+        <code id="srcName">line_datamart.json</code><br>
+        <span style="opacity:.7">records: <span id="recCount">–</span></span>
+      </div>
+    </aside>
+
+    <!-- ===================== Main ===================== -->
+    <main class="main">
+
+      <!-- Overview アンカー -->
+      <div class="topbar" id="overview">
+        <div>
+          <h1>Audience Intelligence Overview</h1>
+          <p>LINE 友だち属性・流入経路・エンゲージメント統合分析</p>
+        </div>
+        <div class="status">
+          <span class="pulse"></span>
+          Live datamart · updated <b id="genAt" style="margin-left:4px">–</b>
+        </div>
+      </div>
+
+      <!-- KPI 2段 × 4 = 8指標 -->
+      <section class="kpis" id="kpisRow1"></section>
+
+      <!-- Date slider (全体連動) -->
+      <section class="panel slider-panel">
+        <div class="s-title"><span class="ic">🗓</span> 期間フィルター</div>
+        <div class="slider-wrap"><div id="dateSlider"></div></div>
+        <div class="range-readout">
+          <b id="readoutFrom">–</b> &nbsp;→&nbsp; <b id="readoutTo">–</b>
+        </div>
+      </section>
+
+      <div id="content">
+        <!-- 折れ線 + ドメイン凡例 -->
+        <section class="grid-line">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>日毎の登録者数</h3>
+              <span class="sub" id="lineMeta">–</span>
+            </div>
+            <div class="chart-box tall"><canvas id="lineChart"></canvas></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>分析ドメイン</h3>
+              <span class="sub">3つの独立軸</span>
+            </div>
+            <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin:2px 0 14px">
+              本ダッシュボードは性質の異なる3軸を<b>色で明確に分離</b>しています。
+              属性・流入経路・行動は別物として解釈してください。
+            </p>
+            <div class="domain-legend">
+              <span class="lg-attr"><i></i><b style="color:var(--text)">ユーザー属性</b>（青）— 誰か</span>
+              <span class="lg-acq"><i></i><b style="color:var(--text)">流入経路</b>（緑）— どこから来たか</span>
+              <span class="lg-rich"><i></i><b style="color:var(--text)">エンゲージメント</b>（紫）— 何を押したか / 愛着</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Domain 1: Attribute (青) ===== -->
+        <div class="section-label dom-attr" id="attributes">
+          <span class="chip">Attribute</span>
+          <div>
+            <h2>ユーザー属性</h2>
+            <p>登録ユーザーが「誰か」を示すデモグラフィック指標</p>
+          </div>
+          <span class="meta" id="attrMeta">–</span>
+        </div>
+        <section class="grid-2 dom-attr" id="attrGrid"></section>
+
+        <!-- ===== Domain 2: Acquisition (緑) ===== -->
+        <div class="section-label dom-acq" id="acquisition">
+          <span class="chip">Acquisition</span>
+          <div>
+            <h2>流入経路 <span class="note">※ ユーザー属性とは別軸</span></h2>
+            <p>ユーザーが「どこから来たか」を示す獲得チャネル指標</p>
+          </div>
+          <span class="meta" id="acqMeta">–</span>
+        </div>
+        <section class="grid-2 dom-acq" id="acqGrid"></section>
+
+        <!-- ===== Domain 3: Engagement / Rich menu (紫) ===== -->
+        <div class="section-label dom-rich" id="engagement">
+          <span class="chip">Engagement</span>
+          <div>
+            <h2>エンゲージメント <span class="note">※ 属性・流入経路とは別軸</span></h2>
+            <p>ユーザーが「何を押したか / まちにどれだけ愛着があるか」を示す行動指標</p>
+          </div>
+          <span class="meta" id="richMeta">–</span>
+        </div>
+        <section class="grid-2 dom-rich" id="engGrid"></section>
+
+        <div class="footer-note">
+          Audience IQ · データは <code>line_datamart.json</code> を参照して自動描画されます（日次差し替え対応）
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
