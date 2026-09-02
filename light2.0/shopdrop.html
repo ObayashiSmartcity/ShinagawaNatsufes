@@ -42,8 +42,6 @@
         <div class="cap">Analytics</div>
         <div class="nav-item active" data-target="overview"><span class="ic">◧</span> Overview</div>
         <div class="nav-item" data-target="attributes"><span class="ic attr">◔</span> Attribute（属性）</div>
-        <div class="nav-item" data-target="acquisition"><span class="ic acq">◕</span> Acquisition（流入）</div>
-        <div class="nav-item" data-target="engagement"><span class="ic rich">◱</span> Engagement（所属）</div>
       </nav>
 
       <div class="side-foot">
@@ -60,7 +58,7 @@
         <div>
           <img src="04_obayashi_c.png" alt="大林組 OBAYASHI" class="brand-logo-mobile" />
           <h1>ShopDrop Growth Tracker</h1>
-          <p>ShopDrop 登録者の属性・流入経路・所属を統合分析</p>
+          <p>ShopDrop 登録者の属性を SHOP / DROP 別に分析</p>
         </div>
         <div class="status">
           <span class="pulse"></span>
@@ -87,8 +85,8 @@
       </section>
 
       <div id="content">
-        <!-- 折れ線 + ドメイン凡例 -->
-        <section class="grid-line">
+        <!-- 折れ線（全体 / DROP / SHOP 切替） -->
+        <section class="grid-line-full">
           <div class="panel">
             <div class="panel-head">
               <h3>日毎の登録者数</h3>
@@ -102,25 +100,9 @@
             <div class="line-sub"><span id="lineMeta">–</span></div>
             <div class="chart-box tall"><canvas id="lineChart"></canvas></div>
           </div>
-
-          <div class="panel">
-            <div class="panel-head">
-              <h3>分析ドメイン</h3>
-              <span class="sub">3つの独立軸</span>
-            </div>
-            <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin:2px 0 14px">
-              本ダッシュボードは性質の異なる3軸を<b>色で明確に分離</b>しています。
-              属性・流入経路・所属は別物として解釈してください。
-            </p>
-            <div class="domain-legend">
-              <span class="lg-attr"><i></i><b style="color:var(--text)">DROP</b>（青）／ <b style="color:var(--text)">SHOP</b>（緑）でプラットフォームを識別</span>
-              <span class="lg-acq"><i></i><b style="color:var(--text)">流入・チャネル</b>（緑）— どの経路で登録したか</span>
-              <span class="lg-rich"><i></i><b style="color:var(--text)">所属</b>（紫）— どの企業に属するか</span>
-            </div>
-          </div>
         </section>
 
-        <!-- ===== Domain 1: Attribute (青) — 性別/年代を 全体/DROP/SHOP の3段で ===== -->
+        <!-- ===== ユーザー属性: 性別/年代を横並び, 全体/DROP/SHOP を縦3段 ===== -->
         <div class="section-label dom-attr" id="attributes">
           <div>
             <h2>ユーザー属性</h2>
@@ -129,26 +111,6 @@
           <span class="meta" id="attrMeta">–</span>
         </div>
         <section class="dom-attr attr-tiers" id="attrGrid"></section>
-
-        <!-- ===== Domain 2: Acquisition (緑) ===== -->
-        <div class="section-label dom-acq" id="acquisition">
-          <div>
-            <h2>流入・チャネル <span class="note">※ ユーザー属性とは別軸</span></h2>
-            <p>ユーザーが「どの経路で登録したか」を示す獲得指標</p>
-          </div>
-          <span class="meta" id="acqMeta">–</span>
-        </div>
-        <section class="grid-2 dom-acq" id="acqGrid"></section>
-
-        <!-- ===== Domain 3: Engagement / 所属 (紫) ===== -->
-        <div class="section-label dom-rich" id="engagement">
-          <div>
-            <h2>所属 <span class="note">※ 属性・流入経路とは別軸</span></h2>
-            <p>ユーザーが「どの企業・組織に所属しているか」を示す指標</p>
-          </div>
-          <span class="meta" id="richMeta">–</span>
-        </div>
-        <section class="grid-2 dom-rich" id="engGrid"></section>
 
         <div class="footer-note">
           データは <code>shopdrop_datamart.json</code> を参照して自動描画されます（日次差し替え対応）

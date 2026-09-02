@@ -326,6 +326,9 @@ a.switch-item.active {
 
 /* ---- KPI 3タイル & カラー（DROP=青 / SHOP=緑 / 総登録=グレー）---- */
 .kpis.kpis-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ---- 折れ線グラフ 単独フル幅パネル（右の凡例パネル廃止に伴い）---- */
+.grid-line-full { display: block; margin-bottom: 6px; }
 .kpi.gray { border-top: 3px solid var(--gray); }
 .kpi.attr { border-top: 3px solid var(--attr); }
 .kpi.acq  { border-top: 3px solid var(--acq);  }

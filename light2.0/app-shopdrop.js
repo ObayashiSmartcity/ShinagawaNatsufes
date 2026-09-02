@@ -1,34 +1,28 @@
 /* =========================================================================
  *  app-shopdrop.js — ShopDrop Dashboard logic
- *  元の app.js（LINE版）のロジックを踏襲した ShopDrop 版。
- *  【ShopDrop 版の差分】
- *    - データマートが「配列そのまま」でも {records:[]} 形式でも読める
- *    - 年代は age_group（バンド済み）を直接利用
- *    - 登録プラットフォーム(SHOP/DROP) を shop_user_id / drop_account_id から導出
+ *  元の app.js（LINE版）のデザイン/挙動を踏襲した ShopDrop 版。
+ *  【この版の構成】
  *    - KPIは 総登録数 / DROP登録数 / SHOP登録数 の3タイルのみ
  *    - 登録者数グラフは 全体 / DROP / SHOP を切替表示
  *    - ユーザー属性は 性別・年代 のみを 全体/DROP/SHOP の3段で表示
+ *    - 流入チャネル・所属セクションは無し
  *  カラー方針: DROP=青(attr) / SHOP=緑(acq) / それ以外=グレー(gray)
  * ========================================================================= */
 
 const CFG = window.DASHBOARD_CONFIG;
 const F = CFG.fields;
 
-/* ---- Palette (config accents と対応) ---- */
 const C = {
-  attr: "#3b82f6", acq: "#22c55e", rich: "#a855f7", gray: "#94a3b8",
+  attr: "#3b82f6", acq: "#22c55e", gray: "#94a3b8",
   grid: "rgba(16,24,40,.08)", tick: "#5b636c",
 };
-/* 単色パレット（属性グラフは段ごとに1色で塗り、プラットフォーム色を強調） */
-const acqPalette  = ["#22c55e","#2fbf71","#16a34a","#3ddc84","#0e9f6e","#65d6a0","#0b7d54","#4ade80"];
-const richPalette = ["#a855f7","#c084fc","#9333ea","#7c3aed","#d8b4fe","#8b5cf6","#6d28d9","#e9d5ff"];
 
 let RAW = [];
 let CHART_STORE = {};
 let slider = null;
 let dateDomain = { min: null, max: null, days: [] };
 
-/* 折れ線グラフの現在の選択セグメント & 現在の期間 */
+/* 折れ線グラフの選択セグメント & 現在の期間 */
 let linePlat = "all";
 let curFrom = null, curTo = null;
 
@@ -75,13 +69,12 @@ function tokens(val, splitComma) {
   return s.split(",").map(t => t.trim()).filter(Boolean);
 }
 
-/* ---- 年代（age_group はバンド済み文字列） ---- */
 function ageBandOf(r) {
   const g = r[F.ageGroup];
   return (g === undefined || g === null) ? "" : String(g).trim();
 }
 
-/* ---- 登録プラットフォーム(SHOP / DROP) を導出 ---- */
+/* 登録プラットフォーム(SHOP / DROP) を導出 */
 function platformOf(r) {
   const hasShop = r[F.shopId] != null && String(r[F.shopId]).trim() !== "";
   const hasDrop = r[F.dropId] != null && String(r[F.dropId]).trim() !== "";
@@ -130,7 +123,7 @@ async function boot() {
          <span style="color:var(--dim)">HTML を直接ダブルクリックで開くとブラウザ制約で JSON を読めません。
          フォルダ内で <code>python -m http.server</code> を起動し <b>http://localhost:8000</b> からアクセスしてください。</span>`
       : `描画中にエラーが発生しました（${e.message}）。<br>
-         <span style="color:var(--dim)">ブラウザのキャッシュに古い HTML が残っている可能性があります。
+         <span style="color:var(--dim)">キャッシュに古い HTML が残っている可能性があります。
          <b>Ctrl+Shift+R</b>でスーパーリロードしてください。</span>`;
     setHTML("#content", `<div class="state err">${msg}</div>`);
   }
@@ -148,6 +141,7 @@ function bindNav() {
     });
   });
   const sections = [...items].map(i => document.getElementById(i.dataset.target)).filter(Boolean);
+  if (!sections.length) return;
   const io = new IntersectionObserver((entries) => {
     entries.forEach(en => {
       if (en.isIntersecting) {
@@ -162,13 +156,15 @@ function bindNav() {
 /* ---- 折れ線グラフの 全体/DROP/SHOP 切替 ---- */
 function bindLineSeg() {
   const seg = $("#lineSeg");
-  if (!seg) return;
+  if (!seg) { console.warn("[dashboard] #lineSeg が見つかりません"); return; }
   seg.querySelectorAll("button").forEach(b => {
     b.addEventListener("click", () => {
       seg.querySelectorAll("button").forEach(x => x.classList.remove("active"));
       b.classList.add("active");
-      linePlat = b.dataset.plat;
-      if (curFrom && curTo) safe("折れ線", () => renderTimeseries(curFrom, curTo, linePlat));
+      linePlat = b.dataset.plat || "all";
+      const f = curFrom || dateDomain.min;
+      const t = curTo || dateDomain.max;
+      if (f && t) safe("折れ線", () => renderTimeseries(f, t, linePlat));
     });
   });
 }
@@ -206,23 +202,20 @@ function buildSlider() {
 }
 const tipFmt = () => ({ to: (v) => dayKey(new Date(+v)), from: (v) => v });
 
-/* ========================= filtering / aggregation ========================= */
+/* ========================= aggregation ========================= */
 function inRange(r, from, to) {
   const d = toDate(r[F.addedAt]);
   return d && d >= startOf(from) && d <= endOf(to);
 }
-
 function valueOf(r, field) {
   if (field === "__ageGroup") return ageBandOf(r);
   if (field === "__platform") return platformOf(r);
   return r[field];
 }
-
 function countBy(rows, field, opts = {}) {
   const map = new Map();
   rows.forEach(r => {
-    const val = valueOf(r, field);
-    const toks = tokens(val, opts.splitComma);
+    const toks = tokens(valueOf(r, field), opts.splitComma);
     if (!toks.length) {
       if (opts.includeEmpty) map.set(CFG.emptyLabel, (map.get(CFG.emptyLabel)||0)+1);
       return;
@@ -238,12 +231,10 @@ function countBy(rows, field, opts = {}) {
 function render(from, to) {
   curFrom = from; curTo = to;
   const rows = RAW.filter(r => inRange(r, from, to));
-  safe("KPI",         () => renderKPIs(rows));
-  safe("折れ線",       () => renderTimeseries(from, to, linePlat));
-  safe("属性(3段)",    () => renderAttributes(rows));
-  safe("流入チャート",  () => renderCharts(rows, CFG.acquisitionCharts,"#acqGrid", acqPalette,  "流入"));
-  safe("所属チャート",  () => renderCharts(rows, CFG.engagementCharts, "#engGrid", richPalette, "所属"));
-  safe("メタ更新",      () => updateMeta(rows));
+  safe("KPI",        () => renderKPIs(rows));
+  safe("折れ線",      () => renderTimeseries(from, to, linePlat));
+  safe("属性(3段)",   () => renderAttributes(rows));
+  safe("メタ更新",     () => updateMeta(rows));
 }
 
 /* ---- KPI (3タイル: 総登録数 / DROP / SHOP) ---- */
@@ -254,8 +245,7 @@ function renderKPIs(rows) {
   const vals = { total, dropUsers: dropU, shopUsers: shopU };
 
   const html = CFG.kpis.map(k => {
-    const accent = k.accent === "attr" ? "attr" : k.accent === "acq" ? "acq"
-                 : k.accent === "rich" ? "rich" : k.accent === "gray" ? "gray" : "";
+    const accent = k.accent || "";
     const v = vals[k.key] ?? 0;
     const unit = k.unit ? `<span class="u">${k.unit}</span>` : "";
     return `
@@ -319,7 +309,7 @@ function renderTimeseries(from, to, plat) {
   });
 }
 
-/* ---- ユーザー属性: 性別・年代を 全体 / DROP / SHOP の3段で表示 ---- */
+/* ---- ユーザー属性: 性別・年代を横並び / 全体・DROP・SHOP を縦3段 ---- */
 function renderAttributes(rows) {
   const host = $("#attrGrid");
   if (!host) { console.warn("[dashboard] #attrGrid が見つかりません"); return; }
@@ -335,20 +325,19 @@ function renderAttributes(rows) {
   segs.forEach(seg => {
     const sub = rows.filter(seg.match);
 
-    // 段ラベル
+    // 段ラベル（人数付き）
     host.insertAdjacentHTML("beforeend",
       `<div class="tier-label ${seg.cls}">
          <span class="tier-name">${seg.label}</span>
          <span class="tier-count">${sub.length.toLocaleString()}名</span>
        </div>`);
 
-    // 段内の 性別 + 年代（2カラム）
+    // 段内に 性別 + 年代 を横並び（2カラム）
     let panels = "";
     charts.forEach(c => {
       const canvasId = `attr_${seg.key}_${c.key}`;
       const realField = (c.field && c.field.indexOf("__") === 0) ? c.field : (F[c.field] || c.field);
-      const split = c.multi ? true : false;
-      const agg = countBy(sub, realField, { splitComma: split });
+      const agg = countBy(sub, realField, { splitComma: !!c.multi });
       panels += agg.labels.length
         ? panelCanvas(c.title, canvasId, seg.label, agg.labels.length)
         : panelEmpty(c.title, seg.label);
@@ -359,29 +348,9 @@ function renderAttributes(rows) {
     charts.forEach(c => {
       const canvasId = `attr_${seg.key}_${c.key}`;
       const realField = (c.field && c.field.indexOf("__") === 0) ? c.field : (F[c.field] || c.field);
-      const split = c.multi ? true : false;
-      const agg = countBy(sub, realField, { splitComma: split });
+      const agg = countBy(sub, realField, { splitComma: !!c.multi });
       if (agg.labels.length) drawBarH(canvasId, agg, [seg.color], 0);
     });
-  });
-}
-
-/* ---- ドメイン別 横棒グラフ群（流入・所属用）---- */
-function renderCharts(rows, list, hostSel, palette, tag) {
-  const host = $(hostSel);
-  if (!host) { console.warn(`[dashboard] ${hostSel} が見つかりません`); return; }
-  host.innerHTML = "";
-  list.forEach((c, i) => {
-    const canvasId = `${hostSel.slice(1)}_${c.key}`;
-    const realField = (c.field && c.field.indexOf("__") === 0) ? c.field : (F[c.field] || c.field);
-    const split = c.multi ? true : false;
-    const agg = countBy(rows, realField, { includeEmpty: false, splitComma: split });
-    if (!agg.labels.length) {
-      host.insertAdjacentHTML("beforeend", panelEmpty(c.title, tag));
-      return;
-    }
-    host.insertAdjacentHTML("beforeend", panelCanvas(c.title, canvasId, tag, agg.labels.length));
-    drawBarH(canvasId, agg, palette, i);
   });
 }
 
@@ -410,8 +379,6 @@ function updateMeta(rows) {
   const dropU = rows.filter(isDrop).length;
   const shopU = rows.filter(isShop).length;
   setText("#attrMeta", `全体 ${rows.length} · DROP ${dropU} · SHOP ${shopU}`);
-  setText("#acqMeta",  `対象 ${rows.length}名 · 上位${CFG.topN}`);
-  setText("#richMeta", `所属企業 判明 ${rows.filter(r=>tokens(r[F.enterprise]).length).length}件`);
 }
 
 /* ========================= chart option factory ========================= */
