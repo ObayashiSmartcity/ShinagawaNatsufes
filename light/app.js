@@ -340,7 +340,7 @@ function drawBarH(canvasId, agg, palette, seed=0) {
       datasets: [{
         data: agg.values,
         backgroundColor: agg.labels.map((_,i)=>palette[(i+seed)%palette.length]),
-        borderRadius: 6, barThickness: 18, maxBarThickness: 22,
+        borderRadius: 0, barThickness: 18, maxBarThickness: 22,
       }],
     },
     options: baseOpts({ horizontal: true, xStep: 1 }),
