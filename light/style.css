@@ -40,8 +40,8 @@
   --gray-soft:     rgba(100,116,139,.12);
 
   /* ---- Geometry ---- */
-  --radius:        14px;
-  --radius-sm:     10px;
+  --radius:        0;      /* タイル(KPI/パネル)の角 = 直角 */
+  --radius-sm:     0;      /* タイル内プレースホルダも直角に統一 */
   --gap:           18px;
   --sidebar-w:     248px;
   --shadow:        none;                 /* 立体感なし（フラット） */
