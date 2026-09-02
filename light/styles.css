@@ -1,21 +1,22 @@
 /* =========================================================================
- *  styles.css — Dashboard theme
+ *  styles.css — Dashboard theme (Light / Flat)
  *  配色・角丸・余白はすべてこの :root の変数で一元管理。
  *    Attribute   = 青   (--attr)
  *    Acquisition = 緑   (--acq)
  *    Engagement  = 紫   (--rich)
  *    その他       = グレー (surfaces/text)
+ *  背景 = グレー / タイル = 白 / 立体感・枠線なし(フラット)
  * ========================================================================= */
 
 :root {
   /* ---- Surfaces (ライトテーマ / 背景=グレー・タイル=白) ---- */
   --bg:            #eef0f3;   /* ページ背景（薄いグレー） */
   --bg-a:          #eef0f3;
-  --bg-b:          #e7eaee;
+  --bg-b:          #e9ebef;
   --panel:         #ffffff;   /* タイル/パネル = 白 */
   --panel-2:       #ffffff;   /* グラデ廃止・白で統一 */
-  --panel-hover:   #f3f5f7;
-  --stroke:        #e2e6ea;   /* 罫線 = 薄グレー */
+  --panel-hover:   #ffffff;
+  --stroke:        #e2e6ea;   /* 罫線（フラット化で基本は不使用） */
   --stroke-soft:   #eaedf0;
 
   /* ---- Text (濃いグレー階調) ---- */
@@ -43,7 +44,7 @@
   --radius-sm:     10px;
   --gap:           18px;
   --sidebar-w:     248px;
-  --shadow:        0 1px 3px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
+  --shadow:        none;                 /* 立体感なし（フラット） */
   --font: "Inter","Segoe UI",-apple-system,"Hiragino Kaku Gothic ProN",
           "Yu Gothic UI","Meiryo",system-ui,sans-serif;
 
@@ -55,9 +56,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 20px; }
 
 html, body {
   margin: 0; padding: 0; height: 100%;
-  background:
-    radial-gradient(1200px 600px at 82% -10%, rgba(120,130,150,.035), transparent 60%),
-    linear-gradient(180deg, var(--bg-a), var(--bg-b));
+  background: var(--bg);                 /* フラットなグレー背景 */
   color: var(--text);
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
@@ -74,18 +73,12 @@ html, body {
   padding: 22px 18px; position: sticky; top: 0; height: 100vh;
   display: flex; flex-direction: column; gap: 22px;
 }
-/* ロゴは白（明色）想定のため、白背景でも見えるよう小さなダークのブランドプレートに載せる */
-.brand {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  background: #1f2733;              /* ブランドプレート（濃いスレート） */
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-}
+/* ブランド: 大林組カラーロゴ（白背景）を枠なしで表示 */
+.brand { display: flex; align-items: center; justify-content: flex-start; padding: 2px 2px 0; }
 .brand .brand-logo {
-  width: 150px;         /* プレート内で小さめに表示 */
+  width: 160px;         /* サイドバー内で小さめに表示 */
   max-width: 100%;
   height: auto;
-  opacity: .96;
   display: block;
 }
 /* モバイル用ロゴ（トップバー内）— デスクトップでは非表示 */
@@ -101,7 +94,7 @@ html, body {
   border-radius: 10px; color: var(--muted); font-size: 13.5px; cursor: pointer;
   transition: .15s; user-select: none;
 }
-.nav-item:hover { background: var(--panel-hover); color: var(--text); }
+.nav-item:hover { background: var(--bg); color: var(--text); }
 /* active はドメイン別の色をドット/文字に反映 */
 .nav-item.active { background: var(--gray-soft); color: var(--text); font-weight: 600; }
 .nav-item[data-target="attributes"].active  { background: var(--attr-soft); color: var(--attr); }
@@ -128,9 +121,9 @@ html, body {
 }
 .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--acq); animation: pulse 2s infinite; }
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
-  70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
-  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  0% { box-shadow: 0 0 0 0 rgba(47,143,102,.5); }
+  70% { box-shadow: 0 0 0 8px rgba(47,143,102,0); }
+  100% { box-shadow: 0 0 0 0 rgba(47,143,102,0); }
 }
 
 /* ===================== Brand Hero Banner ===================== */
@@ -138,9 +131,9 @@ html, body {
   margin: 8px 0 24px;
   padding: 30px 24px;
   background: #ffffff;
-  border: 1px solid var(--stroke);
+  border: none;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: none;
   display: grid;
   place-items: center;
 }
@@ -148,38 +141,35 @@ html, body {
   max-width: 640px;
   width: 60%;
   height: auto;
-  opacity: .95;
 }
 @media (max-width: 760px) {
   .hero-brand { padding: 20px 16px; }
   .hero-brand img { width: 82%; }
 }
 
-/* ===================== Panels ===================== */
+/* ===================== Panels (フラット: 影・枠線なし) ===================== */
 .panel {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--stroke); border-radius: var(--radius);
-  padding: 20px; box-shadow: var(--shadow); position: relative;
+  background: var(--panel);
+  border: none; border-radius: var(--radius);
+  padding: 20px; box-shadow: none; position: relative;
 }
 .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; gap: 10px; }
 .panel-head h3 { margin: 0; font-size: 14px; font-weight: 650; }
 .panel-head .sub { font-size: 11.5px; color: var(--dim); white-space: nowrap; }
 
-/* ===================== KPI Tiles (グレー基調) ===================== */
+/* ===================== KPI Tiles (フラット: 影・枠線なし) ===================== */
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin-bottom: 6px; }
 .kpis + .kpis { margin-top: 0; margin-bottom: var(--gap); }
 .kpi {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--stroke); border-radius: var(--radius);
+  background: var(--panel);
+  border: none; border-radius: var(--radius);
   padding: 16px 18px; position: relative; overflow: hidden; transition: .2s;
 }
-.kpi:hover { transform: translateY(-2px); border-color: #cdd4db; box-shadow: 0 4px 16px rgba(16,24,40,.10); }
-/* 装飾グロー（画像状のぼかし円）は撤去し、シックでビジネス寄りの無地面に */
+.kpi:hover { transform: none; box-shadow: none; }
 .kpi .k-label { font-size: 12px; color: var(--muted); letter-spacing:.4px; text-transform: uppercase; font-weight: 600; }
 .kpi .k-val   { font-size: 30px; font-weight: 700; margin: 8px 0 3px; letter-spacing:-.4px; font-variant-numeric: tabular-nums; }
 .kpi .k-val .u { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 2px; }
 .kpi .k-cap   { font-size: 11px; color: var(--dim); }
-/* accent bar は撤去（左端の縦カラーバーを完全削除） */
 
 /* ===================== Date Slider ===================== */
 .slider-panel { margin-bottom: var(--gap); display:flex; align-items:center; gap:22px; flex-wrap:wrap; }
@@ -188,12 +178,12 @@ html, body {
 .slider-wrap { flex: 1; min-width: 320px; padding: 6px 10px 2px; }
 .range-readout {
   font-size: 12.5px; color: var(--text); font-variant-numeric: tabular-nums;
-  background: var(--panel-2); border: 1px solid var(--stroke);
+  background: var(--bg); border: none;
   padding: 7px 14px; border-radius: 10px; white-space: nowrap;
 }
 .range-readout b { color: var(--gray); }
 
-/* noUiSlider theming (グレー) */
+/* noUiSlider theming (ライト) */
 .noUi-target { background: #dfe3e8; border: none; box-shadow: none; height: 6px; }
 .noUi-connect { background: linear-gradient(90deg, #94a3b8, var(--gray)); }
 .noUi-horizontal .noUi-handle {
@@ -203,7 +193,7 @@ html, body {
 }
 .noUi-handle:before, .noUi-handle:after { display: none; }
 .noUi-tooltip {
-  background: var(--panel-2); color: var(--text); border: 1px solid var(--stroke);
+  background: #ffffff; color: var(--text); border: 1px solid var(--stroke);
   font-size: 11px; padding: 3px 8px; border-radius: 7px; font-family: var(--font);
 }
 
@@ -230,10 +220,11 @@ html, body {
 .dom-acq  .chip { background: var(--acq-soft);  color: var(--acq); }
 .dom-rich .chip { background: var(--rich-soft); color: var(--rich); }
 
+/* ドメイン識別は上辺のカラーラインのみ（フラット・枠線なし） */
 .dom-attr .panel { border-top: 2px solid rgba(63,102,179,.55); }
 .dom-acq  .panel { border-top: 2px solid rgba(47,143,102,.55); }
 .dom-rich .panel { border-top: 2px solid rgba(122,88,176,.55);
-  background: #ffffff; }
+  background: var(--panel); }
 
 /* chart canvas boxes */
 .chart-box { position: relative; height: 240px; }
@@ -258,7 +249,7 @@ html, body {
 
 /* loading / error */
 .state { padding: 40px; text-align:center; color: var(--muted); font-size: 13px; }
-.state.err { color: #f43f5e; }
+.state.err { color: #e11d48; }
 .footer-note { margin-top: 28px; font-size: 11px; color: var(--dim); text-align:center; }
 .footer-note code { color: var(--muted); }
 
@@ -274,12 +265,9 @@ html, body {
   .main { padding: 16px 14px 40px; }
   .kpis { grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  /* --- モバイル用ロゴ（トップバー内）：白ロゴをダークプレートに載せて表示 --- */
+  /* --- モバイル用ロゴ（トップバー内・白背景ロゴをそのまま表示） --- */
   .brand-logo-mobile {
-    display: block; width: 116px; height: auto;
-    opacity: .96; margin: 0 0 12px; padding: 8px 12px;
-    background: #1f2733; border-radius: var(--radius-sm);
-    box-sizing: content-box;
+    display: block; width: 132px; height: auto; margin: 0 0 12px;
   }
 }
 
@@ -291,7 +279,7 @@ html, body {
   .topbar { gap: 10px; margin-bottom: 16px; }
   .topbar h1 { font-size: 17px; line-height: 1.25; word-break: break-word; }
   .topbar p  { font-size: 11.5px; line-height: 1.45; }
-  .brand-logo-mobile { width: 104px; margin-bottom: 10px; }
+  .brand-logo-mobile { width: 120px; margin-bottom: 10px; }
 
   /* --- ステータスバッジ：全幅で改行させて重なり回避 --- */
   .status {
