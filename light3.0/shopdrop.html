@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LINE Growth Tracker — Dashboard</title>
+  <title>ShopDrop Growth Tracker — Dashboard</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Inter=本文 / Noto Sans JP 900=インパクトのある見出し(和英対応) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Chart.js + noUiSlider -->
@@ -18,11 +17,10 @@
 
   <!-- App theme + config -->
   <link rel="stylesheet" href="styles.css">
-  <script src="config.js"></script>
+  <script src="config-shopdrop.js"></script>
 </head>
 <body class="page-fade">
   <div class="app">
-
     <!-- ===================== Sidebar ===================== -->
     <aside class="sidebar">
       <div class="brand">
@@ -32,39 +30,35 @@
       <!-- ダッシュボード切替（LINE ⇄ ShopDrop） -->
       <nav class="nav-group switch-group">
         <div class="cap">Dashboards</div>
-        <a class="nav-item switch-item active" href="index.html" aria-current="page">
+        <a class="nav-item switch-item" href="index.html" data-nav>
           <span class="ic">◧</span> LINE Growth Tracker
         </a>
-        <a class="nav-item switch-item" href="shopdrop.html" data-nav>
+        <a class="nav-item switch-item active" href="shopdrop.html" aria-current="page">
           <span class="ic acq">◨</span> ShopDrop Tracker
         </a>
       </nav>
 
       <nav class="nav-group">
         <div class="cap">Analytics</div>
-        <!-- data-target でセクションへスムーズスクロール -->
         <div class="nav-item active" data-target="overview"><span class="ic">◧</span> Overview</div>
         <div class="nav-item" data-target="attributes"><span class="ic attr">◔</span> Attribute（属性）</div>
-        <div class="nav-item" data-target="acquisition"><span class="ic acq">◕</span> Acquisition（流入）</div>
-        <div class="nav-item" data-target="engagement"><span class="ic rich">◱</span> Engagement（行動）</div>
       </nav>
 
       <div class="side-foot">
         <span class="dot">●</span> Data source<br>
-        <code id="srcName">line_datamart.json</code><br>
+        <code id="srcName">shopdrop_datamart.json</code><br>
         <span style="opacity:.7">records: <span id="recCount">–</span></span>
       </div>
     </aside>
 
     <!-- ===================== Main ===================== -->
     <main class="main">
-
       <!-- Overview アンカー -->
       <div class="topbar" id="overview">
         <div>
           <img src="04_obayashi_c.png" alt="大林組 OBAYASHI" class="brand-logo-mobile" />
-          <h1>LINE Growth Tracker</h1>
-          <p>LINE 友だち属性・流入経路・エンゲージメント統合分析</p>
+          <h1>ShopDrop Growth Tracker</h1>
+          <p>ShopDrop 登録者の属性を SHOP / DROP 別に分析</p>
         </div>
         <div class="status">
           <span class="pulse"></span>
@@ -74,12 +68,12 @@
 
       <!-- モバイル用 ダッシュボード切替 -->
       <div class="switch-mobile">
-        <a class="chip chip-active" href="index.html">LINE Growth Tracker</a>
-        <a class="chip" href="shopdrop.html" data-nav>ShopDrop Tracker</a>
+        <a class="chip" href="index.html" data-nav>LINE Growth Tracker</a>
+        <a class="chip chip-active" href="shopdrop.html">ShopDrop Tracker</a>
       </div>
 
-      <!-- KPI 2段 × 4 = 8指標 -->
-      <section class="kpis" id="kpisRow1"></section>
+      <!-- KPI 3タイル: 総登録数 / DROP登録数 / SHOP登録数 -->
+      <section class="kpis kpis-3" id="kpisRow1"></section>
 
       <!-- Date slider (全体連動) -->
       <section class="panel slider-panel">
@@ -91,65 +85,35 @@
       </section>
 
       <div id="content">
-        <!-- 折れ線 + ドメイン凡例 -->
-        <section class="grid-line">
+        <!-- 折れ線（全体 / DROP / SHOP 切替） -->
+        <section class="grid-line-full">
           <div class="panel">
             <div class="panel-head">
               <h3>日毎の登録者数</h3>
-              <span class="sub" id="lineMeta">–</span>
+              <!-- 全体 / DROP / SHOP 切替 -->
+              <div class="seg" id="lineSeg">
+                <button type="button" data-plat="all" class="active">全体</button>
+                <button type="button" data-plat="DROP">DROP</button>
+                <button type="button" data-plat="SHOP">SHOP</button>
+              </div>
             </div>
+            <div class="line-sub"><span id="lineMeta">–</span></div>
             <div class="chart-box tall"><canvas id="lineChart"></canvas></div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-head">
-              <h3>分析ドメイン</h3>
-              <span class="sub">3つの独立軸</span>
-            </div>
-            <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin:2px 0 14px">
-              本ダッシュボードは性質の異なる3軸を<b>色で明確に分離</b>しています。
-              属性・流入経路・行動は別物として解釈してください。
-            </p>
-            <div class="domain-legend">
-              <span class="lg-attr"><i></i><b style="color:var(--text)">ユーザー属性</b>（青）— 誰か</span>
-              <span class="lg-acq"><i></i><b style="color:var(--text)">流入経路</b>（緑）— どこから来たか</span>
-              <span class="lg-rich"><i></i><b style="color:var(--text)">エンゲージメント</b>（紫）— 何を押したか / 愛着</span>
-            </div>
           </div>
         </section>
 
-        <!-- ===== Domain 1: Attribute (青) ===== -->
+        <!-- ===== ユーザー属性: 性別/年代を横並び, 全体/DROP/SHOP を縦3段 ===== -->
         <div class="section-label dom-attr" id="attributes">
           <div>
             <h2>ユーザー属性</h2>
-            <p>登録ユーザーが「誰か」を示すデモグラフィック指標</p>
+            <p>性別・年代を「全体 / DROP / SHOP」の3段で比較</p>
           </div>
           <span class="meta" id="attrMeta">–</span>
         </div>
-        <section class="grid-2 dom-attr" id="attrGrid"></section>
-
-        <!-- ===== Domain 2: Acquisition (緑) ===== -->
-        <div class="section-label dom-acq" id="acquisition">
-          <div>
-            <h2>流入経路 <span class="note">※ ユーザー属性とは別軸</span></h2>
-            <p>ユーザーが「どこから来たか」を示す獲得チャネル指標</p>
-          </div>
-          <span class="meta" id="acqMeta">–</span>
-        </div>
-        <section class="grid-2 dom-acq" id="acqGrid"></section>
-
-        <!-- ===== Domain 3: Engagement / Rich menu (紫) ===== -->
-        <div class="section-label dom-rich" id="engagement">
-          <div>
-            <h2>エンゲージメント <span class="note">※ 属性・流入経路とは別軸</span></h2>
-            <p>ユーザーが「何を押したか / まちにどれだけ愛着があるか」を示す行動指標</p>
-          </div>
-          <span class="meta" id="richMeta">–</span>
-        </div>
-        <section class="grid-2 dom-rich" id="engGrid"></section>
+        <section class="dom-attr attr-tiers" id="attrGrid"></section>
 
         <div class="footer-note">
-          データは <code>line_datamart.json</code> を参照して自動描画されます（日次差し替え対応）
+          データは <code>shopdrop_datamart.json</code> を参照して自動描画されます（日次差し替え対応）
         </div>
       </div>
     </main>
@@ -170,6 +134,6 @@
     })();
   </script>
   <script src="dashboard-core.js"></script>
-  <script src="app.js"></script>
+  <script src="app-shopdrop.js"></script>
 </body>
 </html>
