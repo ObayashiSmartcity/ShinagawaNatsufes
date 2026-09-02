@@ -8,7 +8,6 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Inter=本文 / Noto Sans JP 900=インパクトのある見出し(和英対応) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Chart.js + noUiSlider -->
@@ -41,7 +40,6 @@
 
       <nav class="nav-group">
         <div class="cap">Analytics</div>
-        <!-- data-target でセクションへスムーズスクロール -->
         <div class="nav-item active" data-target="overview"><span class="ic">◧</span> Overview</div>
         <div class="nav-item" data-target="attributes"><span class="ic attr">◔</span> Attribute（属性）</div>
         <div class="nav-item" data-target="acquisition"><span class="ic acq">◕</span> Acquisition（流入）</div>
@@ -76,9 +74,8 @@
         <a class="chip chip-active" href="shopdrop.html">ShopDrop Tracker</a>
       </div>
 
-      <!-- KPI 2段 × 4 = 8指標 -->
-      <section class="kpis" id="kpisRow1"></section>
-      <section class="kpis" id="kpisRow2"></section>
+      <!-- KPI 3タイル: 総登録数 / DROP登録数 / SHOP登録数 -->
+      <section class="kpis kpis-3" id="kpisRow1"></section>
 
       <!-- Date slider (全体連動) -->
       <section class="panel slider-panel">
@@ -95,10 +92,17 @@
           <div class="panel">
             <div class="panel-head">
               <h3>日毎の登録者数</h3>
-              <span class="sub" id="lineMeta">–</span>
+              <!-- 全体 / DROP / SHOP 切替 -->
+              <div class="seg" id="lineSeg">
+                <button type="button" data-plat="all" class="active">全体</button>
+                <button type="button" data-plat="DROP">DROP</button>
+                <button type="button" data-plat="SHOP">SHOP</button>
+              </div>
             </div>
+            <div class="line-sub"><span id="lineMeta">–</span></div>
             <div class="chart-box tall"><canvas id="lineChart"></canvas></div>
           </div>
+
           <div class="panel">
             <div class="panel-head">
               <h3>分析ドメイン</h3>
@@ -109,28 +113,28 @@
               属性・流入経路・所属は別物として解釈してください。
             </p>
             <div class="domain-legend">
-              <span class="lg-attr"><i></i><b style="color:var(--text)">ユーザー属性</b>（青）— 誰か</span>
+              <span class="lg-attr"><i></i><b style="color:var(--text)">DROP</b>（青）／ <b style="color:var(--text)">SHOP</b>（緑）でプラットフォームを識別</span>
               <span class="lg-acq"><i></i><b style="color:var(--text)">流入・チャネル</b>（緑）— どの経路で登録したか</span>
-              <span class="lg-rich"><i></i><b style="color:var(--text)">所属・エンゲージメント</b>（紫）— どの企業に属するか</span>
+              <span class="lg-rich"><i></i><b style="color:var(--text)">所属</b>（紫）— どの企業に属するか</span>
             </div>
           </div>
         </section>
 
-        <!-- ===== Domain 1: Attribute (青) ===== -->
+        <!-- ===== Domain 1: Attribute (青) — 性別/年代を 全体/DROP/SHOP の3段で ===== -->
         <div class="section-label dom-attr" id="attributes">
           <div>
             <h2>ユーザー属性</h2>
-            <p>登録ユーザーが「誰か」を示すデモグラフィック指標</p>
+            <p>性別・年代を「全体 / DROP / SHOP」の3段で比較</p>
           </div>
           <span class="meta" id="attrMeta">–</span>
         </div>
-        <section class="grid-2 dom-attr" id="attrGrid"></section>
+        <section class="dom-attr attr-tiers" id="attrGrid"></section>
 
         <!-- ===== Domain 2: Acquisition (緑) ===== -->
         <div class="section-label dom-acq" id="acquisition">
           <div>
             <h2>流入・チャネル <span class="note">※ ユーザー属性とは別軸</span></h2>
-            <p>ユーザーが「どこから・どの経路で登録したか」を示す獲得指標</p>
+            <p>ユーザーが「どの経路で登録したか」を示す獲得指標</p>
           </div>
           <span class="meta" id="acqMeta">–</span>
         </div>
@@ -139,7 +143,7 @@
         <!-- ===== Domain 3: Engagement / 所属 (紫) ===== -->
         <div class="section-label dom-rich" id="engagement">
           <div>
-            <h2>所属・エンゲージメント <span class="note">※ 属性・流入経路とは別軸</span></h2>
+            <h2>所属 <span class="note">※ 属性・流入経路とは別軸</span></h2>
             <p>ユーザーが「どの企業・組織に所属しているか」を示す指標</p>
           </div>
           <span class="meta" id="richMeta">–</span>
